@@ -9,7 +9,7 @@ from bluesky_widgets.components.search.searches import SearchList, Search
 from bluesky_widgets.qt.searches import QtSearches
 from bluesky_widgets.examples.utils.generate_msgpack_data import get_catalog
 from bluesky_widgets.examples.utils.add_search_mixin import columns
-
+from bluesky_widgets.utils.event import EmitterGroup, Event
 from qtpy.QtWidgets import QPushButton, QVBoxLayout, QWidget
 
 
@@ -29,14 +29,8 @@ class SearchesWidget(QWidget):
         # when you click it.
         go_button = QPushButton("Process Selected Runs")
         layout.addWidget(go_button)
-        go_button.clicked.connect(self.on_click)
-
-    def on_click(self):
-        for uid, run in self.model.active.selection_as_catalog.items():
-            # Pretend to kick off data processing or something.
-            print(
-                f"Processing Run {uid[:8]} (scan_id={run.metadata['start']['scan_id']})"
-            )
+        go_button.clicked.connect(self.model.events.process)
+        self.model.events.process.connect(lambda e: go_button.setVisible(False))
 
 
 class Searches(SearchList):
@@ -47,6 +41,7 @@ class Searches(SearchList):
     def __init__(self, *, show=True, title=""):
         super().__init__()
         self.title = title
+        self.events.add(process=Event)
         widget = SearchesWidget(self)
         self.window = Window(widget, show=show)
 
@@ -64,6 +59,14 @@ class Searches(SearchList):
     def close(self):
         """Close the window."""
         self.window.close()
+
+    def on_process(self, event):
+        # Pretend to kick off data processing or something.
+        for uid, run in self.active.selection_as_catalog.items():
+            print(
+                f"Processing Run {uid[:8]} (scan_id={run.metadata['start']['scan_id']})"
+            )
+
 
 
 def main():

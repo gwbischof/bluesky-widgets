@@ -7,23 +7,8 @@ from bluesky_widgets.examples.utils.add_search_mixin import AddSearchMixin
 from bluesky_widgets.examples.utils.generate_msgpack_data import get_catalog
 from bluesky_widgets.examples.qt_search import Searches
 from qtpy.QtWidgets import QPushButton, QWidget, QVBoxLayout
+from PyQt5.QtCore import pyqtSlot
 from bluesky_widgets.utils.event import EmitterGroup, Event
-
-
-class QThing(QWidget):
-    def __init__(self, model, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.searches = QtSearches(model)
-        layout = QVBoxLayout()
-        self.setLayout(layout)
-        layout.addWidget(QtSearches(model, parent=self))
-        self.go_button = QPushButton(self)
-        self.go_button.clicked.connect(lambda: self.c())
-        layout.addWidget(self.go_button)
-
-    def c(self):
-        print("WWWWWWWW")
-
 
 class Viewer(napari.Viewer, AddSearchMixin):
     def __init__(self, *args, **kwargs):
@@ -31,23 +16,20 @@ class Viewer(napari.Viewer, AddSearchMixin):
         self.searches = SearchList()
         # Add a button that does something with the currently-selected Runs
         # when you click it.
-        #self.go_button = QPushButton(self.window.qt_viewer)
-        #self.go_button.setText = "String"
-        #self.go_button.clicked.connect(lambda: print("AAAAAAAA"))
-        #self.window.add_dock_widget(self.go_button, area="left")
-        #self.events.add(process=Event)
-        #self.model.events.process.connect(lambda e: go_button.setVisible(False))
-
+        self.go_button = QPushButton("LOAD RANDOM IMAGE", self.window.qt_viewer)
+        self.go_button.clicked.connect(self.on_process)
+        self.window.add_dock_widget(self.go_button, area="left")
+        self.events.add(process=Event)
+        self.model.events.process.connect(lambda e: go_button.setVisible(False))
+    
     def on_process(self):
-        print("TESTING!!!!!")
-        #image = np.random.rand(200, 200)
-        #self.add_image(image)
-
+        image = np.random.rand(200, 200)
+        self.add_image(image)
 
 with napari.gui_qt():
     viewer = Viewer()
     viewer.grid_view()  # Place images side by side, not stacked.
-    viewer.window.add_dock_widget(QThing(viewer.searches), area="right")
+    viewer.window.add_dock_widget(QtSearches(viewer.searches), area="right")
     viewer.add_search(get_catalog())
     # ...and one listing any and all catalogs discovered on the system.
     from databroker import catalog

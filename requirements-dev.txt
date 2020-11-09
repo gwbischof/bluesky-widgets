@@ -10,6 +10,7 @@ ophyd
 pytest
 pytest-qt
 qtpy
+PyQt5>=5.12.3,!=5.15.0
 sphinx
 # These are dependencies of various sphinx extensions for documentation.
 ipython

@@ -68,7 +68,6 @@ class Searches(SearchList):
             )
 
 
-
 def main():
     print(__doc__)
     with gui_qt("Example Application"):
